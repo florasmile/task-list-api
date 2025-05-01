@@ -13,7 +13,6 @@ class Task(db.Model):
     @classmethod
     def from_dict(cls, task_data):
         new_task = cls(
-            id=task_data["id"],
             title=task_data["title"],
             description=task_data["description"],
             completed_at=task_data["completed_at"] 
