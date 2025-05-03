@@ -28,11 +28,7 @@ class Task(db.Model):
             "title": self.title,
             "description": self.description
         }
-
-        if not self.completed_at:
-            response_dict["is_complete"] = False
-        else:
-            response_dict["completed_at"] = self.completed_at
+        response_dict["is_complete"] = True if self.completed_at else False
 
         return response_dict
     

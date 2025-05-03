@@ -3,6 +3,7 @@ from sqlalchemy import asc, desc
 from app.models.task import Task
 from ..db import db
 from .route_utilities import validate_model, create_model
+from datetime import datetime
 
 #create bp
 bp = Blueprint("bp", __name__, url_prefix="/tasks")
@@ -51,7 +52,7 @@ def get_task(id):
 
     return task.to_nested_dict()
 
-@bp.delete("<id>")
+@bp.delete("/<id>")
 def delete_task(id):
     task = validate_model(Task, id)
 
@@ -59,3 +60,17 @@ def delete_task(id):
     db.session.commit()
 
     return Response(status=204, mimetype='application/json')
+
+@bp.patch("/<id>/<completion_status>")
+def modify_task_completion(id, completion_status):
+    task = validate_model(Task, id)
+    
+    if completion_status == 'mark_incomplete':
+        task.completed_at = None
+    else:
+        task.completed_at = datetime.now()
+
+    db.session.commit()
+
+    return Response(status= 204, mimetype="application/json")
+
