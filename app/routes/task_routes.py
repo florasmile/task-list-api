@@ -1,5 +1,5 @@
-from wsgiref import validate
 from flask import Blueprint, request, Response
+from sqlalchemy import asc, desc
 from app.models.task import Task
 from ..db import db
 from .route_utilities import validate_model, create_model
@@ -19,7 +19,14 @@ def create_task():
 
 @bp.get("")
 def get_all_tasks():
-    query = db.select(Task).order_by(Task.id)
+    query = db.select(Task)
+    sort_param = request.args.get("sort")
+    if sort_param == 'asc':
+        query = query.order_by(asc(Task.title))
+    elif sort_param == 'desc':
+        query = query.order_by(desc(Task.title))
+    else:
+        query = query.order_by(Task.id)
 
     tasks = db.session.scalars(query)
 
