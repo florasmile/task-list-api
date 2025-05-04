@@ -4,6 +4,8 @@ from app.models.task import Task
 from ..db import db
 from .route_utilities import validate_model, create_model
 from datetime import datetime
+import requests
+import os
 
 #create bp
 bp = Blueprint("bp", __name__, url_prefix="/tasks")
@@ -62,15 +64,34 @@ def delete_task(id):
     return Response(status=204, mimetype='application/json')
 
 @bp.patch("/<id>/<completion_status>")
-def modify_task_completion(id, completion_status):
+def modify_task_completion_status(id, completion_status):
     task = validate_model(Task, id)
     
     if completion_status == 'mark_incomplete':
         task.completed_at = None
     else:
         task.completed_at = datetime.now()
+        # send message to slack workspace
+        send_request_to_slackbot(task.title)
 
     db.session.commit()
 
     return Response(status= 204, mimetype="application/json")
 
+def send_request_to_slackbot(task_title):
+    path = "https://slack.com/api/chat.postMessage"
+   
+    headers = {
+    "Authorization": f"Bearer {os.environ.get('SLACKBOT_ACCESS_TOKEN')}",
+    "Content-Type": "application/json"
+    }
+
+    body = {
+        "channel": "test-slack-api",
+        "text": f"Dehui just completed the task {task_title}"
+    }
+
+    response = requests.post(path, headers=headers, json=body)
+
+    print(response.status_code)
+    print(response.json())
