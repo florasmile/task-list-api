@@ -29,13 +29,15 @@ class Task(db.Model):
     
     # Return a Python dictionary from a model instance
     def to_dict(self):
+
         response_dict = {
             "id": self.id,
             "title": self.title,
-            "description": self.description,
-            "goal_id": self.goal_id
-        
+            "description": self.description
         }
+        if self.goal_id:
+            response_dict["goal_id"] = self.goal_id
+            
         response_dict["is_complete"] = True if self.completed_at else False
 
         return response_dict
