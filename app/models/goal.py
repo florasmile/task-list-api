@@ -18,3 +18,8 @@ class Goal(db.Model):
             "id": self.id,
             "title": self.title
         }
+    
+    def to_nested_dict(self):
+        return {
+            "goal": self.to_dict()
+        }

@@ -2,23 +2,19 @@ from flask import Blueprint, request, Response
 from sqlalchemy import asc, desc
 from app.models.task import Task
 from ..db import db
-from .route_utilities import validate_model, create_model
+from .route_utilities import validate_model, create_response_from_model_data
 from datetime import datetime
 import requests
 import os
 
 #create bp
-bp = Blueprint("bp", __name__, url_prefix="/tasks")
+bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 @bp.post("")
 def create_task():
     request_body = request.get_json()
-    new_task = create_model(Task, request_body)
+    return create_response_from_model_data(Task, request_body)
 
-    db.session.add(new_task)
-    db.session.commit()
-    
-    return new_task.to_nested_dict(), 201
 
 @bp.get("")
 def get_all_tasks():
