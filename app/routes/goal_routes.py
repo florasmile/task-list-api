@@ -1,5 +1,6 @@
 from flask import Blueprint, request, Response
 from app.models.goal import Goal
+from app.models.task import Task
 from ..db import db
 from .route_utilities import validate_model, create_response_from_model_data
 
@@ -44,3 +45,32 @@ def delete_goal(id):
     db.session.commit()
 
     return Response(status=204, mimetype='application/json')
+
+
+@bp.post("/<goal_id>/tasks")
+def post_task_ids_to_goal(goal_id):
+    # validate goal_id
+    goal = validate_model(Goal, goal_id)
+    # remove the relation of the goal with its existing tasks
+    for task in goal.tasks:
+        task.goal_id = None
+    #validate each task id in the request body
+    
+    request_body = request.get_json()
+    task_ids = request_body.get("task_ids")
+    for task_id in task_ids:
+        task = validate_model(Task, task_id)
+        task.goal_id = goal.id
+    db.session.commit()
+
+    return {
+        "id": goal.id,
+        "task_ids": task_ids
+    }
+@bp.get("/<goal_id>/tasks")
+def get_tasks_of_one_goal(goal_id):
+    #validate goal
+    goal = validate_model(Goal, goal_id)
+    response = goal.to_dict()
+    response["tasks"] = [task.to_dict() for task in goal.tasks]
+    return response
