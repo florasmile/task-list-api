@@ -1,10 +1,9 @@
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, requests
 from sqlalchemy import asc, desc
 from app.models.task import Task
 from ..db import db
-from .route_utilities import validate_model, create_response_from_model_data
+from .route_utilities import validate_model, get_all_sorted_with_filters, create_response_from_model_data
 from datetime import datetime
-import requests
 import os
 
 #create bp
@@ -18,18 +17,26 @@ def create_task():
 
 @bp.get("")
 def get_all_tasks():
-    query = db.select(Task)
-    sort_param = request.args.get("sort")
-    if sort_param == 'asc':
-        query = query.order_by(asc(Task.title))
-    elif sort_param == 'desc':
-        query = query.order_by(desc(Task.title))
-    else:
-        query = query.order_by(Task.id)
+    return get_all_sorted_with_filters(Task, request.args)
+    # query = db.select(Task)
 
-    tasks = db.session.scalars(query)
+    # title_filter = request.args.get("title")
+    # # sort by id, or sort by title, and filter task by title
+    # sort_order = request.args.get("sort", "asc")
+    # sort_by = request.args.get("sort_by", "title")
+ 
+    # if title_filter:
+    #     query = query.where(Task.title.ilike(f"%{title_filter}%"))
+    
+    # sort_column = getattr(Task, sort_by)
+    # if sort_order == "desc":
+    #     query = query.order_by(desc(sort_column))
+    # else:
+    #     query = query.order_by(asc(sort_column))
 
-    return [task.to_dict() for task in tasks]
+    # tasks = db.session.scalars(query)
+
+    # return [task.to_dict() for task in tasks]
 
 @bp.put("/<id>")
 def update_task(id):

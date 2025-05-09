@@ -4,6 +4,7 @@ from ..db import db
 from datetime import datetime
 from sqlalchemy import DateTime
 from typing import Optional
+from .model_utilities import validate_datetime
 
 class Task(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -23,7 +24,9 @@ class Task(db.Model):
                 description=task_data["description"]
         )
         if "completed_at" in task_data:
-            new_task.completed_at = task_data["completed_at"] 
+            datetime_str = task_data.get("completed_at") 
+            if validate_datetime(datetime_str):
+                new_task.completed_at = datetime_str
 
         return new_task
     

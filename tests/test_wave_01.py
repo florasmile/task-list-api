@@ -98,6 +98,57 @@ def test_create_task(client):
     assert new_task.description == "Test Description"
     assert new_task.completed_at == None
 
+##optional enhancement 1: test create_task with valid datetime format
+def test_create_task_with_valid_datetime(client):
+    # Act
+    response = client.post("/tasks", json={
+        "title": "A Brand New Task",
+        "description": "Test Description",
+        "completed_at": "2024-05-08T15:30:00"
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 201
+    assert "task" in response_body
+    assert response_body == {
+        "task": {
+            "id": 1,
+            "title": "A Brand New Task",
+            "description": "Test Description",
+            "is_complete": True
+        }
+    }
+    
+    query = db.select(Task).where(Task.id == 1)
+    new_task = db.session.scalar(query)
+
+    assert new_task
+    assert new_task.title == "A Brand New Task"
+    assert new_task.description == "Test Description"
+    assert new_task.completed_at.isoformat() == "2024-05-08T15:30:00"
+
+##optional enhancement 2: test create_task with invalid datetime format 
+def test_create_task_with_invalid_datetime(client):
+    # Act
+    response = client.post("/tasks", json={
+        "title": "A Brand New Task",
+        "description": "Test Description",
+        "completed_at": "2024-05-08, 15:30pm"
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    
+    assert response_body == {
+        "error": "Invalid datetime format"
+    }
+    
+    query = db.select(Task).where(Task.id == 1)
+    new_task = db.session.scalar(query)
+
+    assert not new_task
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task(client, one_task):

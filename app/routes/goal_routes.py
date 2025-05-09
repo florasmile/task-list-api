@@ -2,7 +2,7 @@ from flask import Blueprint, request, Response
 from app.models.goal import Goal
 from app.models.task import Task
 from ..db import db
-from .route_utilities import validate_model, create_response_from_model_data
+from .route_utilities import validate_model, create_response_from_model_data, get_all_sorted_with_filters
 
 #create bp
 bp = Blueprint("goals", __name__, url_prefix="/goals")
@@ -14,10 +14,12 @@ def create_goal():
 
 @bp.get("")
 def get_all_goals():
-    query = db.select(Goal).order_by(Goal.id)
-    goals = db.session.scalars(query)
+    
+    return get_all_sorted_with_filters(Goal, request.args)
+    # query = db.select(Goal).order_by(Goal.id)
+    # goals = db.session.scalars(query)
 
-    return [goal.to_dict() for goal in goals]
+    # return [goal.to_dict() for goal in goals]
 
 @bp.get("/<id>")
 def get_one_goal(id):
