@@ -1,4 +1,5 @@
-from flask import Blueprint, request, Response, requests
+from flask import Blueprint, request, Response
+import requests
 from sqlalchemy import asc, desc
 from app.models.task import Task
 from ..db import db
